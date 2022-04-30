@@ -65,14 +65,14 @@ contract NFT is ERC721, ERC721URIStorage, Ownable {
         require(!nft.minted, "NFT already minted");
         require(nft.amount == msg.value, "Invalid amount paid");
 
+        // set the pending nfts status to minted
+        nft.minted = true;
+
         // mint the nft
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, nft.tokenURI);
-
-        // set the pending nfts status to minted
-        nft.minted = true;
 
         // create a royalty splitter contract
         royaltyReceiver[tokenId] = new Splitter(
