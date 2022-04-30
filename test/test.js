@@ -76,5 +76,20 @@ describe("Greeter", function () {
     const finalBalanceOfCeleb = await signers[2].getBalance();
     expect(ethers.utils.formatEther(finalBalanceOfCeleb.sub(initialBalanceOfCeleb))).to.equal("0.025");
     expect(ethers.utils.formatEther(finalBalanceOfMetaverse.sub(initialBalanceOfMetaverse))).to.equal("0.025");
+  });
+
+  it("Should not split the payment after 1 year of minting", async function () {
+    // increase the block.timestamp by 1 year
+    await ethers.provider.send("evm_increaseTime", [365 * 24 * 3600]);
+
+    // then send the transaction
+    const { receiver, royaltyAmount } = await nftContract.royaltyInfo(0, ethers.utils.parseEther("1"));
+    const initialBalanceOfMetaverse = await signers[1].getBalance();
+    const initialBalanceOfCeleb = await signers[2].getBalance();
+    await signers[0].sendTransaction({ to: receiver, value: royaltyAmount });
+    const finalBalanceOfMetaverse = await signers[1].getBalance();
+    const finalBalanceOfCeleb = await signers[2].getBalance();
+    expect(ethers.utils.formatEther(finalBalanceOfCeleb.sub(initialBalanceOfCeleb))).to.equal("0.0");
+    expect(ethers.utils.formatEther(finalBalanceOfMetaverse.sub(initialBalanceOfMetaverse))).to.equal("0.05");
   })
 });
