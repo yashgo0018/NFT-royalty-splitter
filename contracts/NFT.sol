@@ -5,9 +5,10 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./Splitter.sol";
 
-contract NFT is ERC721, ERC721URIStorage, Ownable {
+contract NFT is ERC721, ERC721URIStorage, Ownable, IERC2981 {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
@@ -111,11 +112,24 @@ contract NFT is ERC721, ERC721URIStorage, Ownable {
     function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
         external
         view
+        override
         returns (address receiver, uint256 royaltyAmount)
     {
         require(_exists(_tokenId), "Token not found");
         receiver = address(royaltyReceiver[_tokenId]);
         // set the royalty amount to 5% of the sales amount
         royaltyAmount = (_salePrice * 5) / 100;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(IERC165, ERC721)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC2981).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 }

@@ -13,6 +13,15 @@ describe("Greeter", function () {
     await nftContract.deployed();
   });
 
+  it("Should support erc165, erc721, erc2981 interfaces", async function () {
+    const ERC165_INTERFACE_ID = "0x01ffc9a7";
+    const ERC721_INTERFACE_ID = "0x80ac58cd";
+    const ERC2981_INTERFACE_ID = "0x2a55205a";
+    assert(await nftContract.supportsInterface(ERC165_INTERFACE_ID), "ERC165 Interface Id not supported");
+    assert(await nftContract.supportsInterface(ERC721_INTERFACE_ID), "ERC721 Interface Id not supported");
+    assert(await nftContract.supportsInterface(ERC2981_INTERFACE_ID), "ERC2981 Interface Id not supported");
+  });
+
   it("Should not create pending nft if the user is not a celeb", async function () {
     await expect(nftContract.addPendingNFT("tokenUri", ethers.utils.parseEther("1")))
       .to.be.revertedWith("Only Celeb allowed");
